@@ -1,0 +1,70 @@
+import csv
+from datetime import datetime
+
+STOCK_PRICES = {
+    "AAPL": 185.50,
+    "TSLA": 240.00,
+    "GOOGL": 142.30,
+    "MSFT": 415.20,
+    "AMZN": 178.90
+}
+
+def track_portfolio():
+    portfolio = []
+    total_investment = 0.0
+
+    print("=== Stock Portfolio Performance Tracker ===")
+    print("Available Stocks & Current Prices:")
+    for ticker, price in STOCK_PRICES.items():
+        print(f"  - {ticker}: ${price:.2f}")
+    print("\nEnter stock details (type 'done' as ticker to finish):\n")
+
+    while True:
+        ticker = input("Enter Stock Ticker (e.g., AAPL): ").upper().strip()
+        if ticker == "DONE":
+            break
+        if ticker not in STOCK_PRICES:
+            print("Stock not found in available list. Please try again.\n")
+            continue
+
+        try:
+            quantity = int(input(f"Enter quantity of {ticker} shares: "))
+            if quantity <= 0:
+                print("Quantity must be greater than zero.\n")
+                continue
+        except ValueError:
+            print("Invalid number. Please enter a valid integer.\n")
+            continue
+
+        price = STOCK_PRICES[ticker]
+        value = price * quantity
+        total_investment += value
+        portfolio.append({
+            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Ticker": ticker,
+            "Price_USD": price,
+            "Quantity": quantity,
+            "Total_Value_USD": round(value, 2)
+        })
+        print(f"Added {quantity} shares of {ticker} (${value:.2f})\n")
+
+    if not portfolio:
+        print("No stocks entered. Exiting.")
+        return
+
+    print("\n--- Portfolio Summary ---")
+    for item in portfolio:
+        print(f"{item['Ticker']}: {item['Quantity']} shares @ ${item['Price_USD']:.2f} = ${item['Total_Value_USD']:.2f}")
+    print(f"Total Portfolio Value: ${total_investment:.2f}")
+
+    filename = "portfolio_performance.csv"
+    with open(filename, mode="w", newline="") as file:
+        fieldnames = ["Timestamp", "Ticker", "Price_USD", "Quantity", "Total_Value_USD"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(portfolio)
+
+    print(f"\nPortfolio data successfully saved to '{filename}'.")
+
+if __name__ == "__main__":
+    track_portfolio()
